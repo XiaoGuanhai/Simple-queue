@@ -1,0 +1,52 @@
+version: "3.2"
+services:
+  ## web服务端
+  web:
+    build:
+      context: https://gitee.com/ddtechs/docker-php.git
+      args:
+        - PHP_VERSION=7.3
+    container_name: "web"
+    ports:
+      - 80:80
+    volumes:
+      - ./../example/web:/app:delegated
+      - ./config/apache.conf:/etc/apache2/sites-available/000-default.conf:delegated
+      - ./config/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini:delegated
+  ## queue+socket服务端
+  node:
+    build:
+      context: https://gitee.com/ddtechs/docker-node.git
+      args:
+        - NODE_VERSION=latest
+    container_name: "node"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        npm install
+        pm2 start socket.js --watch
+        pm2 start queue.js --watch
+        pm2 save
+        tail -f /dev/null
+    stdin_open: true
+    tty: true
+    environment:
+      NODE_ENV: dev
+    ports:
+      - 3314:3314
+      - 3315:3315
+    volumes:
+      - ./../example/web:/app:delegated
+      - ./../example/logs:/var/logs:delegated
+      - ./../.env:/.env:delegated
+      - ./../.env.local:/.env.local:delegated
+  ## Redis服务
+  redis:
+    container_name: "redis"
+    image: "redis"
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]

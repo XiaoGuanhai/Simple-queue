@@ -1,0 +1,52 @@
+{
+    "queue": {
+        /** [RPC队列] 接口回调地址 */
+        "url": "", //@see .env>QUEUE_URL
+        "server": "", //@see .env>QUEUE_SERVER_URL
+        "port": 3314,
+        /** 默认超时设置(毫秒) */
+        "defaultTimeout": 600000,
+        /** [RPC队列] 数据库 */
+        "db": {
+            "prefix": "rpc_",
+            "redis": {
+                "url": "", //@see .env>QUEUE_REDIS_URL
+            }
+        }
+    },
+    /************************************** Socket服务 ***************************************/
+    /** Socket服务使用数据库(用于维护在线状态) */
+    "socket": {
+        "db": {
+            "prefix": "socket_",
+            "redis": {
+                "url": "" //@see .env>SOCKET_REDIS_URL
+            }
+        },
+        "authorization": "", //@see .env>SOCKET_SERVER_AUTHORIZATION
+        "server": "", //@see .env>SOCKET_SERVER_URL
+        "port": "" //@see .env>SOCKET_SERVER_PORT
+    },
+    /************************************* 全局日志设置 **************************************/
+    "log":{
+        "path": "./../var/logs",
+        "log4js": {
+            "appenders": {
+                "console": { "type": "stdout" },
+                "dateFile": {
+                    "type": "dateFile",
+                    "pattern": "yyyy-MM-dd.log",
+                    "alwaysIncludePattern": true,
+                    "maxLogSize": 20480000,
+                    "backups": 100
+                }
+            },
+            "categories": {
+                "default": { "appenders": ["console", "dateFile"], "level": "debug" },
+                "dev": { "appenders": ["console","dateFile"], "level": "trace" },
+                "test": { "appenders": ["console","dateFile"], "level": "trace" },
+                "production": { "appenders": ["dateFile"], "level": "error" }
+            }
+        },
+    }
+}
