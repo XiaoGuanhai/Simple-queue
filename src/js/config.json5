@@ -3,12 +3,12 @@
         /** [RPC队列] 接口回调地址 */
         "url": "", //@see .env>QUEUE_URL
         "server": "", //@see .env>QUEUE_SERVER_URL
-        "port": 3314,
+        "port": "", //@see .env>QUEUE_SERVER_PORT
         /** 默认超时设置(毫秒) */
         "defaultTimeout": 600000,
         /** [RPC队列] 数据库 */
         "db": {
-            "prefix": "rpc_",
+            "prefix": "queue_",
             "redis": {
                 "url": "", //@see .env>QUEUE_REDIS_URL
             }
@@ -29,7 +29,7 @@
     },
     /************************************* 全局日志设置 **************************************/
     "log":{
-        "path": "./../var/logs",
+        "path": "", //@see .env>LOG_PATH
         "log4js": {
             "appenders": {
                 "console": { "type": "stdout" },

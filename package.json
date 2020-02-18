@@ -1,11 +1,10 @@
 {
-    "name": "server",
+    "name": "queue-simple-framework",
     "version": "1.0.0",
-    "main": "main.js",
-    "scripts": {
-        "socket": "socket.js",
-        "queue": "queue.js"
-    },
+    "license": "Apache License 2.0",
+    "description": "可以帮你快速启动队列服务。",
+    "repository": "",
+    "main": "src/js/main.js",
     "engines": {
         "node": ">=10.15"
     },

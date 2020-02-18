@@ -1,34 +1,27 @@
 <?php
 
-
+/**
+ * @copyright Copyright (c) 2018 Siu <xiaoguanhai@gmail.com>
+ * @author Siu <xiaoguanhai@gmail.com>
+ * @since 2020.02.18
+ * @link http://www.ddtechs.cn
+ */
 namespace Siu;
 
-
-use App\Basic\Component\PropertyAccess;
-use App\Basic\Component\PropertyAccessor;
-use App\Basic\Controller\BasicController;
-use App\Basic\Entity\User;
-use App\Basic\Exception\ApiProblemException;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\Routing\Router;
-use Symfony\Component\VarDumper\VarDumper;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
+/**
+ * 简易队列框架
+ * @package Siu
+ */
 class Queue
 {
-    /**
-     * @var Router
-     */
-    private $router;
     /**
      * @var PropertyAccessor
      */
@@ -70,12 +63,11 @@ class Queue
     private $params;
     private $callable = 'service';
 
-    public function __construct(Router $router, Socket $socket, $options = [])
+    public function __construct(Socket $socket, $options = [])
     {
         $this->socket = $socket;
         $this->options = array_merge($options, []);
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $this->router = $router;
         $this->id = uniqid();
     }
 
@@ -132,7 +124,7 @@ class Queue
                 'failedAlive' => $this->failedAlive,
                 'completeAlive' => $this->completeAlive,
                 'title' => $this->title,
-                'url' => $this->router->generate('api_queue', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                'url' => $this->url,
                 'timeout' => $this->timeout, //超时时间
                 'service' => $this->service,
                 'callable' => $this->callable,
@@ -210,7 +202,7 @@ class Queue
                     $params = $this->service;
             }
             if (count($params) < 2) {
-                throw new ApiProblemException(20002010, "无效的service", $this->service);
+                throw new QueueException(20002010, "无效的service", $this->service);
             }
             $name = array_shift($params);
             $function = array_shift($params);

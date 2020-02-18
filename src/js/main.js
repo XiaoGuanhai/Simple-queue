@@ -15,3 +15,12 @@ Object.defineProperty(global, "__line", {
         return __stack[1].getLineNumber()
     }
 });
+module.exports = {
+    initialization: function(path){
+        const config = require('./config').load(path);
+        return {
+            queue: require('./queue').initialization(config),
+            socket: require('./socket').initialization(config)
+        };
+    }
+};

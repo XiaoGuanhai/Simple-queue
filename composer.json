@@ -1,5 +1,5 @@
 {
-    "name": "siu/queue",
+    "name": "siu/queue-simple-framework",
     "license": "Apache License 2.0",
     "description": "Queue简易框架",
     "type": "project",
@@ -25,7 +25,6 @@
     },
     "require": {
         "php": "^7.3",
-        "symfony/dotenv": "^5.0",
         "symfony/http-client": "^5.0",
         "wisembly/elephant.io": "^3.3"
     },
