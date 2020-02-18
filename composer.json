@@ -2,17 +2,7 @@
     "name": "siu/queue-simple-framework",
     "license": "Apache License 2.0",
     "description": "Queue简易框架",
-    "type": "project",
-    "config": {
-        "optimize-autoloader": true,
-        "preferred-install": {
-            "*": "dist"
-        },
-        "sort-packages": true,
-        "platform": {
-            "php": "7.3"
-        }
-    },
+    "type": "metapackage",
     "autoload": {
         "psr-4": {
             "Siu\\": "src/"
