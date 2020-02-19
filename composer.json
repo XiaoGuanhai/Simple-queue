@@ -3,6 +3,13 @@
     "license": "Apache License 2.0",
     "description": "Queue简易框架",
     "type": "library",
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
     "autoload": {
         "psr-4": {
             "Siu\\": "src/"
@@ -16,6 +23,7 @@
     "require": {
         "php": "^7.3",
         "symfony/http-client": "^5.0",
+        "symfony/property-access": "^5.0",
         "wisembly/elephant.io": "^3.3"
     },
     "require-dev": {
@@ -25,7 +33,13 @@
     "minimum-stability": "dev",
     "extra": {
         "branch-alias": {
-            "master": "1.0-dev"
+            "dev-master": "1.0-dev"
+        }
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://mirrors.aliyun.com/composer/"
         }
     }
 }

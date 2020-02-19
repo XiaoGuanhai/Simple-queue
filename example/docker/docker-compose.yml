@@ -23,10 +23,10 @@ services:
       - /bin/sh
       - -c
       - |
-        cd /app/example/web
-        npm install -g
-        pm2 start server.js --watch
-        pm2 start client.js --watch
+        yarn upgrade --no-bin-links
+        pm2 start example/web/socket.js --watch
+        pm2 start example/web/queue.js --watch
+        pm2 start example/web/client.js --watch
         pm2 save
         tail -f /dev/null
     stdin_open: true

@@ -8,6 +8,7 @@
  */
 namespace Siu;
 
+use ElephantIO\Engine\SocketIO\Version2X;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -42,8 +43,9 @@ class Queue
     private $completeAlive = 0;
     private $job = 0;
     private $progress = 0;
+    private $error;
     /**
-     * @var Socket
+     * @var Version2X
      */
     private $socket;
     /**
@@ -63,7 +65,14 @@ class Queue
     private $params;
     private $callable = 'service';
 
-    public function __construct(Socket $socket, $options = [])
+    /**
+     * Queue constructor.
+     * @param mixed $socket socket客户端
+     * @param array $options 队列参数
+     * $options[server] string 队列地址
+     * $options[port] string 队列端口
+     */
+    public function __construct($socket, $options = [])
     {
         $this->socket = $socket;
         $this->options = array_merge($options, []);
@@ -130,6 +139,7 @@ class Queue
                 'callable' => $this->callable,
                 'data' => $this->data,
                 'body' => $this->body,
+                'error' => $this->error,
                 'job' => [
                     'type' => $this->type,
                     'options' => $this->options,
@@ -168,6 +178,7 @@ class Queue
         $this->data = $this->propertyAccessor->getValue($options, '[data]', $this->data);
         $this->body = $this->propertyAccessor->getValue($options, '[body]', $this->body);
         $this->callable = $this->propertyAccessor->getValue($options, '[callable]', $this->callable);
+        $this->error = $this->propertyAccessor->getValue($options, '[error]', $this->error);
         $this->params = $this->build();
         return $this;
     }
@@ -184,11 +195,10 @@ class Queue
 
     /**
      * 执行服务
-     * @param BasicController $container
      * @return mixed
      * @throws \Exception
      */
-    public function doService($container)
+    public function doService()
     {
         try {
             switch ($this->callable) {
@@ -202,14 +212,17 @@ class Queue
                     $params = $this->service;
             }
             if (count($params) < 2) {
-                throw new QueueException(20002010, "无效的service", $this->service);
+                throw new QueueException(50001, "无效的service", $this->service);
             }
             $name = array_shift($params);
             $function = array_shift($params);
             $params[] = $this;
-            $object = $container->get($name);
+            if(!class_exists($name)) {
+                throw new QueueException(50002, "{$name} 类不存在.", $this->service);
+            }
+            $object = new $name();
             if (!method_exists($object, $function)) {
-                throw new ApiProblemException(20002011, get_class($object) . "->{$function} 方法不存在.", $this->service);
+                throw new QueueException(50003, get_class($object) . "->{$function} 方法不存在.", $this->service);
             }
             return call_user_func_array([$object, $function], $params);
         } catch (\Exception $ex) {
@@ -368,7 +381,7 @@ class Queue
     {
         $this->progress = $progress;
         $this->socket->initialize();
-        $data = $this->propertyAccessor->getValue($this->params, '[data]', []);
+        $data = $this->propertyAccessor->getValue($this->build(), '[data]', []);
         $data = array_merge($data, ['progress' => $progress]);
         return $this->socket->emit('job progress', $data);
     }
