@@ -8,6 +8,7 @@
  */
 namespace Siu;
 
+use ElephantIO\Client;
 use ElephantIO\Engine\SocketIO\Version2X;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -375,7 +376,7 @@ class Queue
 
     /**
      * @param $progress
-     * @return Socket
+     * @return Client
      */
     public function setProgress($progress)
     {
