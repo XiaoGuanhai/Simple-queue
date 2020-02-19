@@ -26,44 +26,44 @@ class Queue
     /**
      * @var PropertyAccessor
      */
-    private $propertyAccessor;
+    protected $propertyAccessor;
     /**
      * @var User
      */
-    private $user;
-    private $options = [];
-    private $timeout = 600;
-    private $data = [];
-    private $id;
-    private $title;
-    private $service = [];
-    private $type = 'service';
-    private $url;
-    private $failedAlive = 0;
-    private $completeAlive = 0;
-    private $job = 0;
-    private $progress = 0;
-    private $error;
+    protected $user;
+    protected $options = [];
+    protected $timeout = 600;
+    protected $data = [];
+    protected $id;
+    protected $title;
+    protected $service = [];
+    protected $type = 'service';
+    protected $url;
+    protected $failedAlive = 0;
+    protected $completeAlive = 0;
+    protected $job = 0;
+    protected $progress = 0;
+    protected $error;
     /**
      * @var Version2X
      */
-    private $socket;
+    protected $socket;
     /**
      * 队列失败之后的回调
      * @var array
      */
-    private $failed = [];
+    protected $failed = [];
     /**
      * 队列成功之后的回调
      * @var array
      */
-    private $complete = [];
-    private $body;
+    protected $complete = [];
+    protected $body;
     /**
      * @var array
      */
-    private $params;
-    private $callable = 'service';
+    protected $params;
+    protected $callable = 'service';
 
     /**
      * Queue constructor.
@@ -122,7 +122,7 @@ class Queue
     /**
      * @return array
      */
-    private function build()
+    protected function build()
     {
         $this->params = [
             'type' => $this->type,
