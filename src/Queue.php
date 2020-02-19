@@ -29,7 +29,7 @@ class Queue
      */
     protected $propertyAccessor;
     /**
-     * @var User
+     * @var mixed
      */
     protected $user;
     protected $options = [];
@@ -46,7 +46,7 @@ class Queue
     protected $progress = 0;
     protected $error;
     /**
-     * @var Version2X
+     * @var Client
      */
     protected $socket;
     /**

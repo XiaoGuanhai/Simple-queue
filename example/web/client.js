@@ -7,7 +7,6 @@ const socket = io(config.config.socket.server + ':' + config.config.socket.port 
 });
 // 接收到socket服务器连接成功事件
 socket.on('connect', function(data) {
-    console.log(data);
     console.log('connect', 'ok');
 });
 // 接收到socket服务器断开事件

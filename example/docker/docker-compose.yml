@@ -23,7 +23,7 @@ services:
       - /bin/sh
       - -c
       - |
-        yarn upgrade --no-bin-links
+        yarn install --no-bin-links
         pm2 start example/web/socket.js --watch
         pm2 start example/web/queue.js --watch
         pm2 start example/web/client.js --watch
