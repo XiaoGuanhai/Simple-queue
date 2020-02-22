@@ -24,10 +24,11 @@ services:
       - -c
       - |
         yarn install --no-bin-links
-        pm2 start example/web/socket.js --watch
-        pm2 start example/web/queue.js --watch
-        pm2 start example/web/client.js --watch
+        NODE_ENV=dev pm2 start example/web/socket.js --watch
+        NODE_ENV=dev pm2 start example/web/queue.js --watch
+        NODE_ENV=dev pm2 start example/web/client.js --watch
         pm2 save
+        pm2 logs
         tail -f /dev/null
     stdin_open: true
     tty: true

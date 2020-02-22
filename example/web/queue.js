@@ -1,4 +1,8 @@
 'use strict';
-const queue = require('./../../lib/main').initialization('./example/web/.env');
+const client = require('./../../lib/main').initialization('./example/web/.env');
 /** 启动队列服务 **/
-queue.queue.start();
+const queue = client.queue;
+queue.afterService = function(err, response, data){
+    console.log(response);
+};
+queue.start({service: 10});
