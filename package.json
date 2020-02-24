@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "license": "Apache-2.0",
     "description": "可以帮你快速启动队列服务。",
-    "main": "lib/main.js",
+    "main": "lib/index.js",
     "files": [
         "lib/"
     ],

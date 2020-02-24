@@ -4,10 +4,6 @@
 Queue简易框架
 
 #### 软件架构
-***时序图说明***
-![image](https://public-1256939332.cos.ap-guangzhou.myqcloud.com/queue/timing-diagram.png)
-
-
 ***数据流程图说明***
 
 ![image](https://public-1256939332.cos.ap-guangzhou.myqcloud.com/queue/data-flow-chart.png)
@@ -16,31 +12,25 @@ Queue简易框架
 #### 使用说明
 ##### 全局变量设置
 ```dotenv
-#  * .env                包含应用程序所需的环境变量的默认值
-#  * .env.local          带有本地替代的未提交文件
-# 环境变量
-APP_ENV=dev
-# 应用密钥（暂时未使用）        
-APP_SECRET=0d0e71bec41cfe7cfbe3ce3b0a468c4e
+#  ./.env                包含应用程序所需的环境变量的默认值
+#  ./.env.local          带有本地替代的未提交文件
+#  全局变量优先级 .env.local > .env
+
+APP_ENV=dev                                     # 环境变量     
+APP_SECRET=0d0e71bec41cfe7cfbe3ce3b0a468c4e     # 应用密钥
+
 ###> Queue ###
-# 队列定时任务接口地址（暂时未使用）
-QUEUE_URL=http://web:8081/api.php
-# 队列服务端地址
-QUEUE_SERVER_URL=http://node
-# 队列服务端端口
-QUEUE_SERVER_PORT=3314
-# 队列连接用的redis地址
-QUEUE_REDIS_URL=redis://redis:6379/1
+QUEUE_URL=http://web:8081/api.php                # 队列定时任务接口地址（暂时未使用）
+QUEUE_SERVER_URL=http://node                     # 队列服务端地址
+QUEUE_SERVER_PORT=3314                           # 队列服务端端口
+QUEUE_REDIS_URL=redis://redis:6379/1             # 队列连接用的redis地址
 ###< Queue ###
+
 ###> Socket ###
-# socket服务端地址
-SOCKET_SERVER_URL=http://node
-# socket服务端端口
-SOCKET_SERVER_PORT=3315
-# socket连接用的redis地址
-SOCKET_REDIS_URL=redis://redis:6379/2
-# socket连接用的密钥（暂时未使用）
-SOCKET_SERVER_AUTHORIZATION=12b3c4d5e6f7g8h9i
+SOCKET_SERVER_URL=http://node                    # socket服务端地址
+SOCKET_SERVER_PORT=3315                          # Socket服务端端口
+SOCKET_REDIS_URL=redis://redis:6379/2            # Socket连接用的redis地址（暂时未使用）
+SOCKET_SERVER_AUTHORIZATION=12b3c4d5e6f7g8h9i    # socket连接用的密钥
 ###< Socket ###
 ```
 
@@ -110,18 +100,24 @@ echo json_encode($data);
 ```js
 'use strict';
 // ./example/web/.env 为你的配置文件路径
-const client = require('queue-simple-framework').initialization('./example/web/.env');
+const client = require('queue-simple-framework')('./example/web/.env');
 /** 启动队列服务 **/
-client.queue.start();
+// service 为服务名称
+// 10 表示并发数最大值为10
+client.queue.start({"service": "10"});
 ```
 
 ##### Socket服务端
 ```js
 'use strict';
 // ./example/web/.env 为你的配置文件路径
-const client = require('queue-simple-framework').initialization('./example/web/.env');
-/** 启动队列服务 **/
-client.socket.start();
+const client = require('queue-simple-framework')('./example/web/.env');
+/** 启动服务 **/
+client.socket.start(function(token, done){
+        done(true);/** 客户端通过验证 */
+        // done(false);/** 客户端 验证不通过， 踢出*/
+    }
+);
 ```
 
 ##### Socket客户端
@@ -161,3 +157,7 @@ socket.on('failed', function(data) {
 ```
 
 *** 更多使用方法可参考 `example目录` ***
+
+`example/web/socket.js` Socket服务端代码例子
+
+`example/web/queue.js` Queue服务端代码例子

@@ -11,7 +11,7 @@ class example
         // 发送信息
         $queue->setData(['message' => $message]);
         // 汇报进度
-        for($i = 10; $i < 100; $i += 10) {
+        for($i = 10; $i < 100; $i += 30) {
             sleep(1);
             $queue->setProgress($i);
         }
@@ -25,7 +25,13 @@ class example
 /**
  * Socket客户端
  */
-$client = new Client(new Version2X("http://node:3315"));
+$client = new Client(new Version2X("http://node:3315", [
+    [
+        'headers' => [
+            'authorization: 12b3c4d5e6f7g8h9i'
+        ],
+    ]
+]));
 // 实例化队列
 $queue = new \Siu\Queue($client, [
     'server' => 'http://node',
