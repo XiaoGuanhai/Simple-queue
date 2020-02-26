@@ -32,20 +32,69 @@ class Queue
      * @var mixed
      */
     protected $user;
-    protected $options = [];
     protected $timeout = 600;
+    /**
+     * 任务回调的数据
+     * @var array
+     */
     protected $data = [];
-    protected $id;
+    /**
+     * 订阅者
+     * @var string
+     */
+    protected $subscriber;
+    /**
+     * 任务标题
+     * @var string
+     */
     protected $title;
+    /**
+     * 任务执行的回调
+     * @var array
+     */
     protected $service = [];
-    protected $type = 'service';
+    /**
+     * 任务执行的回调地址
+     * @var string
+     */
     protected $url;
+    /**
+     * 任务失败之后是否保持记录
+     * 1 保持记录
+     * 0 删除记录
+     * @var int
+     */
     protected $failedAlive = 0;
+    /**
+     * 任务完成之后是否保持记录
+     * 1 保持记录
+     * 0 删除记录
+     * @var int
+     */
     protected $completeAlive = 0;
-    protected $job = 0;
+    /**
+     * 任务类型
+     * @var string
+     */
+    protected $type = 'service';
+    /**
+     * 任务参数
+     * @var array
+     */
+    protected $options = [];
+    /**
+     * 任务进度
+     * 最大值 100
+     * @var int
+     */
     protected $progress = 0;
+    /**
+     * 错误信息
+     * @var string
+     */
     protected $error;
     /**
+     * Socket客户端
      * @var Client
      */
     protected $socket;
@@ -59,12 +108,32 @@ class Queue
      * @var array
      */
     protected $complete = [];
+    /**
+     * 执行回调之后的html内容
+     * @var string
+     */
     protected $body;
     /**
      * @var array
      */
     protected $params;
+    /**
+     * 将要执行的回调类型
+     * @var string
+     */
     protected $callable = 'service';
+    /**
+     * 任务ID
+     * @var string
+     */
+    protected $id = 0;
+    /**
+     * 计划任务的时间
+     * 格式 * * * * * *
+     * 参考 @link https://crontab.guru/
+     * @var string
+     */
+    protected $schedule;
 
     /**
      * Queue constructor.
@@ -78,7 +147,6 @@ class Queue
         $this->socket = $socket;
         $this->options = array_merge($options, []);
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $this->id = uniqid();
     }
 
     /**
@@ -89,10 +157,6 @@ class Queue
      */
     public function example($data, $queue)
     {
-        for($i = 10; $i < 100; $i += 10) {
-            sleep(1);
-            $queue->setProgress($i);
-        }
         $queue->setProgress(100)
             ->close();
         return [
@@ -121,14 +185,17 @@ class Queue
     }
 
     /**
+     * @param string|null $type 任务类型 schedule|service
+     * @param array $options 任务参数
      * @return array
      */
-    protected function build()
+    protected function build($type = null, $options = [])
     {
         $this->params = [
-            'type' => $this->type,
+            'type' => $type ? $type : $this->type,
             'data' => [
                 'id' => $this->id,
+                'subscriber' => $this->subscriber,
                 'failed' => $this->failed,
                 'complete' => $this->complete,
                 'failedAlive' => $this->failedAlive,
@@ -141,13 +208,11 @@ class Queue
                 'data' => $this->data,
                 'body' => $this->body,
                 'error' => $this->error,
-                'job' => [
-                    'type' => $this->type,
-                    'options' => $this->options,
-                    'id' => $this->job,
-                ]
+                'type' => $this->type,
+                'options' => $this->options,
+                'schedule' => $this->schedule
             ],
-            'options' => $this->options
+            'options' => $options ? $options : $this->options
         ];
         return $this->params;
     }
@@ -168,10 +233,11 @@ class Queue
      */
     public function parse(array $options)
     {
-        $this->type = $this->propertyAccessor->getValue($options, '[job][type]', $this->type);
-        $this->job = $this->propertyAccessor->getValue($options, '[job][id]', $this->job);
-        $this->options = $this->propertyAccessor->getValue($options, '[job][options]', $this->options);
+        $this->type = $this->propertyAccessor->getValue($options, '[type]', $this->type);
         $this->id = $this->propertyAccessor->getValue($options, '[id]', $this->id);
+        $this->options = $this->propertyAccessor->getValue($options, '[options]', $this->options);
+        //
+        $this->subscriber = $this->propertyAccessor->getValue($options, '[subscriber]', $this->subscriber);
         $this->title = $this->propertyAccessor->getValue($options, '[title]', $this->title);
         $this->url = $this->propertyAccessor->getValue($options, '[url]', $this->url);
         $this->timeout = $this->propertyAccessor->getValue($options, '[timeout]', $this->timeout);
@@ -180,6 +246,8 @@ class Queue
         $this->body = $this->propertyAccessor->getValue($options, '[body]', $this->body);
         $this->callable = $this->propertyAccessor->getValue($options, '[callable]', $this->callable);
         $this->error = $this->propertyAccessor->getValue($options, '[error]', $this->error);
+        $this->schedule = $this->propertyAccessor->getValue($options, '[schedule]', $this->schedule);
+        //
         $this->params = $this->build();
         return $this;
     }
@@ -191,6 +259,16 @@ class Queue
     public function setId($id)
     {
         $this->id = $id;
+        return $this;
+    }
+
+    /**
+     * @param string|integer $subscriber
+     * @return $this
+     */
+    public function setSubscriber($subscriber)
+    {
+        $this->subscriber = $subscriber;
         return $this;
     }
 
@@ -232,9 +310,9 @@ class Queue
 
     }
 
-    public function getId()
+    public function getSubscriber()
     {
-        return $this->id;
+        return $this->subscriber;
     }
 
     /**
@@ -352,6 +430,7 @@ class Queue
     }
 
     /**
+     * @param null $type
      * @return Api|array|bool
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
@@ -359,19 +438,45 @@ class Queue
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function createJob()
+    public function createJob($type = null)
     {
         $client = HttpClient::create();
         $server = $this->propertyAccessor->getValue($this->options, '[server]');
         $port = $this->propertyAccessor->getValue($this->options, '[port]');
-        $response = $client->request('POST', "{$server}:{$port}/console/job", ['body' => $this->build()]);
+        $response = $client->request('POST', "{$server}:{$port}/console/job", ['body' => $this->build($type)]);
         if ($response->getStatusCode() == 200) {
             $job = $response->toArray();
-            $this->job = $this->propertyAccessor->getValue($job, '[id]', 0);
+            $this->id = $this->propertyAccessor->getValue($job, '[id]', 0);
             return $job;
         } else {
             throw new ApiProblemException(20002012,"创建Job失败");
         }
+    }
+
+    /**
+     * 创建定时器
+     * @param string $schedule
+     * @return Api|array|bool
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function createSchedule($schedule)
+    {
+        return $this->setSchedule($schedule)
+            ->createJob('schedule');
+    }
+
+    /**
+     * @param $schedule
+     * @return $this
+     */
+    public function setSchedule($schedule)
+    {
+        $this->schedule = $schedule;
+        return $this;
     }
 
     /**
@@ -385,13 +490,5 @@ class Queue
         $data = $this->propertyAccessor->getValue($this->build(), '[data]', []);
         $data = array_merge($data, ['progress' => $progress]);
         return $this->socket->emit('job progress', $data);
-    }
-
-    /**
-     * @return mixed|null
-     */
-    public function getJob()
-    {
-        return $this->job;
     }
 }

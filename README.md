@@ -48,11 +48,12 @@ $queue = new \Siu\Queue($client, [
  * 创建队列
  */
 $job = $queue->setUrl('http://web/api.php') /** 设置队列回调地址 */
-    ->setId(1) /** 设置客户端ID */
+    ->setSubscriber(1) /** 设置客户端ID */
     ->enableCompleteAlive() /** 完成之后不会删除队列记录 */
     ->enableFailedAlive() /** 失败之后不会删除队列记录 */
-    ->setService([example::class, 'doAction', '你好啊，客户1!!']) /** 设置回调接口 */
+    ->setService([job::class, 'doAction', '你好啊，客户1!!']) /** 设置回调接口 */
     ->setTitle('消息推送') /** 设置标题 */
+    // ->createSchedule('*/10 * * * * *') /** 创建定时器 */
     ->createJob() /** 创建job */;
 /**
  * 返回结果实例：
@@ -161,3 +162,9 @@ socket.on('failed', function(data) {
 `example/web/socket.js` Socket服务端代码例子
 
 `example/web/queue.js` Queue服务端代码例子
+
+`example/web/schedule.php` Web服务端创建定时器例子
+
+`example/web/job.php` Web服务端创建任务例子
+
+`example/web/example.php` Web服务端处理任务回调例子

@@ -4,13 +4,6 @@ require "./../../vendor/autoload.php";
 use ElephantIO\Engine\SocketIO\Version2X;
 use ElephantIO\Client;
 
-class example
-{
-    function doAction($message, \Siu\Queue $queue)
-    {
-    }
-}
-
 /**
  * Socket客户端
  */
@@ -21,15 +14,15 @@ $queue = new \Siu\Queue($client, [
     'port' => 3314
 ]);
 /**
- * 创建队列
+ * 创建定时执行队列
  */
-$job = $queue->setUrl('http://web/api.php') /** 设置队列回调地址 */
-    ->setId(1) /** 设置客户端ID */
-    ->enableCompleteAlive() /** 完成之后不会删除队列记录 */
-    ->enableFailedAlive() /** 失败之后不会删除队列记录 */
-    ->setService([example::class, 'doAction', '你好啊，客户1!!']) /** 设置回调接口 */
+$job = $queue->setUrl('http://web/example.php') /** 设置队列回调地址 */
+    ->setSubscriber(1) /** 设置客户端ID */
+//    ->enableCompleteAlive() /** 完成之后不会删除队列记录 */
+//    ->enableFailedAlive() /** 失败之后不会删除队列记录 */
+    ->setService(['example', 'doAction', '你好啊，客户1!!']) /** 设置回调接口 */
     ->setTitle('消息推送') /** 设置标题 */
-    ->createJob() /** 创建job */;
+    ->createSchedule('*/10 * * * * *') /** 创建定时器 */;
 /**
  * 返回结果实例：
  * {
